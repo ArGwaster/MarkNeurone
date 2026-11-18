@@ -443,6 +443,53 @@ describe('readForm', () => {
     ]);
   });
 
+  it('keeps the colon out of a label and its value side by side', () => {
+    const p = rowsPage([
+      [T('Personnes concernées')],
+      [L('Nom'), { str: ': Camille ARNOUX', font: 'V', x: 80 }],
+      [L('Téléphone :'), { str: '06 12 34 56 78', font: 'V', x: 250 }],
+      [L('Profession :'), { str: 'Menuisière', font: 'V', x: 250 }],
+    ]);
+    const r = readForm([p], MODEL);
+    expect(r.blocks[0].values.map((v) => [v.label, v.text, v.unknown])).toEqual([
+      ['Nom', 'Camille ARNOUX', false],
+      ['Téléphone', '06 12 34 56 78', false],
+      ['Profession', 'Menuisière', true],
+    ]);
+    const name = r.blocks[0].values[0].anchor;
+    expect(pdfPageText(p.items).text.slice(name.start, name.end)).toBe('Camille ARNOUX');
+  });
+
+  it('reads an unknown label beside its value after a known label left empty', () => {
+    const r = readForm([rowsPage([[T('Personnes concernées')], LV('Nom', 'Camille ARNOUX'), [L('Date de naissance')], LV('Profession', 'Menuisière'), LV('Téléphone', '06 12 34 56 78')])], MODEL);
+    expect(r.blocks[0].values.map((v) => [v.label, v.text, v.unknown])).toEqual([
+      ['Nom', 'Camille ARNOUX', false],
+      ['Profession', 'Menuisière', true],
+      ['Téléphone', '06 12 34 56 78', false],
+    ]);
+  });
+
+  it('keeps a value in two fonts under its label when no label sits beside its value', () => {
+    const r = readForm([rowsPage([[T('Personnes concernées')], [L('Nom')], [L('ARNOUX'), { str: 'Camille', font: 'V', x: 120 }], [L('Téléphone')], [V('06 12 34 56 78')]])], MODEL);
+    expect(values(r.blocks[0])).toEqual([
+      ['Nom', 'ARNOUX Camille'],
+      ['Téléphone', '06 12 34 56 78'],
+    ]);
+  });
+
+  it('keeps bottom lines that differ by a number other than a page number', () => {
+    const withTotal = (rows: Row[][], total: string): FormPageInput => {
+      const p = rowsPage(rows);
+      p.items.push({ str: `Total ${total}`, transform: [SIZE, 0, 0, SIZE, 60, 20], width: 60, fontName: 'V', hasEOL: true });
+      return p;
+    };
+    const r = readForm([withTotal([[T('Personnes concernées')], LV('Nom', 'Camille ARNOUX'), LV('Téléphone', '06 12 34 56 78')], '150'), withTotal([VC('poste 12')], '200')], MODEL);
+    expect(values(r.blocks[0])).toEqual([
+      ['Nom', 'Camille ARNOUX'],
+      ['Téléphone', '06 12 34 56 78 Total 150 poste 12 Total 200'],
+    ]);
+  });
+
   it('works without fonts, with the labels of the model only', () => {
     const p = page(FIRST_PAGE);
     for (const it of p.items) delete it.fontName;

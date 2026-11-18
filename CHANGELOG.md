@@ -2,7 +2,7 @@
 
 ## Non publié
 
-- Formulaires : un libellé suivi de sa valeur sur la même ligne, sans deux-points, est reconnu lorsque libellé et valeur sont écrits dans deux polices différentes (extraits Pappers, par exemple). Un libellé inconnu écrit ainsi est proposé à part, décoché, au lieu de rejoindre la valeur précédente.
+- Formulaires : un libellé suivi de sa valeur sur la même ligne, sans deux-points, est reconnu lorsque libellé et valeur sont écrits dans deux polices différentes (extraits Pappers, par exemple). Un deux-points entre les deux n'entre ni dans le libellé ni dans la valeur. Un libellé inconnu écrit ainsi est proposé à part, décoché, au lieu de rejoindre la valeur précédente.
 - Formulaires : un pied de page répété sur chaque page n'est plus versé dans les valeurs lorsqu'il se termine par le numéro de la page (« ... 1/5 »).
 - Modèle d'exemple pour les extraits Pappers du registre national des entreprises dans `examples/forms/`.
 
